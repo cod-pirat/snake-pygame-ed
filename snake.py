@@ -78,9 +78,28 @@ while running:
                 y_change, x_change = 0, 1
 
         y, x = y_change + y, x_change + x
+
+
+
+
+
+
+
+        if x > GRID_WIDTH_X:
+            x = 0
+        elif y > GRID_HEIGHT_Y:
+            y = 0
+        elif x < 0:
+            x = GRID_WIDTH_X - 1
+        elif y < 0:
+            y = GRID_HEIGHT_Y - 1
+
+
+
+
         rect = pygame.Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
 
-        if x > GRID_WIDTH_X - 1 or y > GRID_HEIGHT_Y - 1 or x < 0 or y < 0 or rect in queue:
+        if rect in queue:
             snake_live = False
 
         if food_rect == rect:
@@ -109,5 +128,5 @@ while running:
 
         pygame.display.update()
         pygame.time.delay(snake_time)
-#
+
 pygame.quit()
