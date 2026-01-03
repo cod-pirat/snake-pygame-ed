@@ -26,7 +26,7 @@ game_map = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -43,12 +43,15 @@ while running:
     screen.fill(WHITE)
 
     # Draw grid based on map
+    wall_rect_list = []
+
     for y in range(GRID_HEIGHT_Y):
         for x in range(GRID_WIDTH_X):
             rect = pygame.Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
 
             if game_map[y][x] == 1:
-                pygame.draw.rect(screen, BLUE, rect)  # Wall
+                pygame.draw.rect(screen, BLACK, rect)  # Wall
+                wall_rect_list.append(rect)
             pygame.draw.rect(screen, BLACK, rect, 1)  # Grid outline
 
     pygame.display.flip()
@@ -61,6 +64,7 @@ while running:
     snake_length = 2
     food_rect = None
     snake_time = 350
+    pause = True
 
     while snake_live:
         for event in pygame.event.get():
@@ -76,14 +80,18 @@ while running:
                 y_change, x_change = 1, 0
             elif event.type == KEYDOWN and event.key == pygame.K_d:
                 y_change, x_change = 0, 1
+            elif event.type == KEYDOWN and (event.key == pygame.K_p or event.key == pygame.K_SPACE):
+                pause = True
+                while pause:
+                    for event_p in pygame.event.get():
+                        if event_p.type == KEYDOWN and (event_p.key == pygame.K_p or event_p.key == pygame.K_SPACE):
+                            pause = False
+                        elif event_p.type == pygame.QUIT:
+                            snake_live = False
+                            running = False
+                            pause = False
 
         y, x = y_change + y, x_change + x
-
-
-
-
-
-
 
         if x > GRID_WIDTH_X:
             x = 0
@@ -94,13 +102,11 @@ while running:
         elif y < 0:
             y = GRID_HEIGHT_Y - 1
 
-
-
-
         rect = pygame.Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
 
-        if rect in queue:
+        if rect in queue or rect in wall_rect_list:
             snake_live = False
+            break
 
         if food_rect == rect:
             snake_length += 1
@@ -120,7 +126,7 @@ while running:
         if food_rect is None:
             food_rect = pygame.Rect(randrange(GRID_WIDTH_X) * TILE_SIZE, randrange(GRID_HEIGHT_Y) * TILE_SIZE,
                                     TILE_SIZE, TILE_SIZE)
-            while food_rect in queue:
+            while food_rect in queue or food_rect in wall_rect_list:
                 food_rect = pygame.Rect(randrange(GRID_WIDTH_X) * TILE_SIZE, randrange(GRID_HEIGHT_Y) * TILE_SIZE,
                                         TILE_SIZE, TILE_SIZE)
         else:
